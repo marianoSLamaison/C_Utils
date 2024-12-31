@@ -17,7 +17,7 @@ void hash_map_example(void)
 						(unsigned char*)elems[1], 
 						(size_t)sizeof(unsigned char) * strlen(elems[1]), 
 						map));
-	hmap_simple_destroy(map);
+	hmap_destroy_lists_map(map);
 	printf("El mapa a sido destruido\n");
 	printf("El valor de %s, ahora apunta a NULL", elems[1]);
 	

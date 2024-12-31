@@ -18,15 +18,23 @@ enum MENSAJES{
 //que no deberian
 typedef struct HASH_MAP t_hmap;
 
+typedef struct KEY_VAL_PAIR
+{
+	void* key;
+	size_t key_size;
+	void* val;
+} t_kvpair;
+
 //crea un hash_map con valores default,
 //vacio
 t_hmap* hmap_create(void);
 /**
  * Remueve un elemento del hash_map
- * Retornra el elemento o NULL si no 
- * encontro nada
+ * Retornra el par de key y dato
+ * que a sido retirado o NULL si no 
+ * encontro nada.
  * */
-void* hmap_remove_with_key(unsigned char* key, size_t key_size, t_hmap* map);
+t_kvpair* hmap_remove_pair(unsigned char* key, size_t key_size, t_hmap* map);
 /**
  * Retorna el valor asociado a una key,
  * sin removerlo del map en si.
@@ -46,15 +54,25 @@ void* hmap_get_value(unsigned char* key, size_t key_size, t_hmap* map);
 int hmap_add(unsigned char* key, size_t key_size, void* val, t_hmap* map);
 /**
  * Destruye todo el diccionario suponiendo
- * que los vals* no tiene punteros a nada
- * dentro sullo
+ * que lo creaste solamente de valores que todavia existen en arrays
+ * generados automaticamente
  * */
-void hmap_simple_destroy(t_hmap* map);
+void hmap_destroy_lists_map(t_hmap* map);
 /**
- * Destruye todo el diccionario, pidiendo una
- * funcion especial para destruir los valores
- * en caso de que estos tengan punteros a 
- * datos
+ * Destruye todo el diccionario, pidiendo funciones
+ * especiales para liberar las variables. 
+ * (Si bien se usa unsigned char* para la key, puedes usar cualquier cosa en realidad
+ * no se toma en cuenta los datos a los que apunten los punteros por ahora.)
  * */
-void hmap_destroy_mv(void (*val_destroyer)(void*), t_hmap* map);
+void hmap_destroy(void (*val_destroyer)(void*), void (*key_destroyer)(void*), t_hmap* map);
+
+/**
+MatroFunction solo llama a hmap_destroy con free como su argumento para key_destroyer
+*/
+#define hmap_destroy_v(val_destroyer, map) hmap_destroy((val_destoryer), free, (map))
+/**
+MatroFunction solo llama a hmap_destroy con free como su argumento para val_destroyer
+*/
+#define hmap_destroy_k(key_destroyer, map) hmap_destroy(free, (key_destroyer), (map)) 
+
 #endif

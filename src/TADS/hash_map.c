@@ -163,39 +163,35 @@ static struct INDEX_NODE* list_get_node(struct INDEX_LIST* list, unsigned char* 
 	return nodo;
 }
 
-static struct INDEX_NODE* list_remove(struct INDEX_LIST* list, unsigned char* key, size_t key_size)
+static struct INDEX_NODE* list_remove_node(struct INDEX_LIST* list, unsigned char* key, size_t key_size)
 {
-	struct INDEX_NODE* nodo = list->head;
-	struct INDEX_NODE* old_nodo = NULL;
-	
-	while(nodo != NULL)
+	struct INDEX_NODE** passer = &list->head;
+	struct INDEX_NODE*  nodo;
+	while(*passer != NULL)
 	{
-		if (cmp_keys(key, key_size, nodo->key, nodo->key_size) == 0) 
+		if ( cmp_keys(key, key_size, (*passer)->key, (*passer)->key_size) == 0 )
 		{
-			if (old_nodo != NULL) 
-			{
-				old_nodo->next = nodo->next;
-				nodo->next = NULL;
-				break;
-			}
-			list->head = nodo->next;
-			nodo->next = NULL;
+			nodo = *passer;		
+			*passer = (*passer)->next;
 			break;
 		}
-		old_nodo = nodo;
-		nodo = nodo->next;
+		passer = &(*passer)->next;
 	}
 	return nodo;
 }
 
-void* hmap_remove_with_key(unsigned char* key, size_t key_size, t_hmap* map)
+t_kvpair* hmap_remove_pair(unsigned char* key, size_t key_size, t_hmap* map)
 {
 	int index = get_index_from_key(key, key_size, map->cap);
-	struct INDEX_NODE* node = list_remove(map->indices + index, key, key_size);
-	void* val = node->val;
-	free(node->key);
-	free(node);
-	return val;
+	t_kvpair* ret;
+	struct INDEX_NODE* nodo = list_remove_node(map->indices + index, key, key_size);
+	if (nodo == NULL) return NULL;
+	ret = malloc(sizeof(t_kvpair));
+	ret->key = nodo->key;
+	ret->key_size = nodo->key_size;
+	ret->val = nodo->val;
+	free(nodo);
+	return ret;
 }
 
 void* hmap_get_value(unsigned char* key, size_t key_size, t_hmap* map)
@@ -217,7 +213,7 @@ int hmap_add(unsigned char* key, size_t key_size, void* val, t_hmap* map)
 	return ret_msg;
 }
 
-void hmap_simple_destroy(t_hmap* map)
+void hmap_destroy_lists_map(t_hmap* map)
 {
 	int i;
 	struct INDEX_NODE* nodo;
@@ -228,8 +224,6 @@ void hmap_simple_destroy(t_hmap* map)
 		while(list->head != NULL)
 		{
 			nodo = index_list_pop(list);
-			//free(nodo->key);
-			//free(nodo->val);
 			free(nodo);
 		}
 	}
@@ -237,7 +231,7 @@ void hmap_simple_destroy(t_hmap* map)
 	free(map);
 }
 
-void hmap_destroy_vals(void (*val_destroyer)(void*), t_hmap* map)
+void hmap_destroy(void (*val_destroyer)(void*), void (*key_destroyer)(void*), t_hmap* map)
 {
 	int i;
 	struct INDEX_NODE* nodo;
@@ -248,7 +242,7 @@ void hmap_destroy_vals(void (*val_destroyer)(void*), t_hmap* map)
 		while(list->head != NULL)
 		{
 			nodo = index_list_pop(list);
-			//free(nodo->key);
+			key_destroyer(nodo->key);
 			val_destroyer(nodo->val);
 			free(nodo);
 		}
