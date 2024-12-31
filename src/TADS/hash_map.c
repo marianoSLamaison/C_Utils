@@ -16,7 +16,7 @@
 
 struct INDEX_NODE
 {
-	unsigned char key;
+	unsigned char* key;
 	size_t key_size;
 	void * val;
 	struct NODO * next;
@@ -132,6 +132,7 @@ static int hmap_rehash(t_hmap* map)
 	}
 	free(map->indices);
 	map->indices = new_ilist;
+	map->cap = new_cap;
 	return 0;
 }
 

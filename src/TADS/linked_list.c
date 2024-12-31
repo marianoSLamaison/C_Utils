@@ -1,15 +1,21 @@
 #include "linked_list.h"
 
+struct NODO
+{
+	struct NODO * next;
+	void * elem;
+};
+
 //por lo general el usuario va a querer tener una lista que puede
 //pasar de lugar a lugar, o va a tener que modificar la lista
 //como su valor, es mas comodo tenerla siempre como un puntero
 //que forsarme a pasarla siempre como una referencia
-t_dllist * llist_create(void)
+t_llist * llist_create(void)
 {
-	t_llist * ret   = (t_llist) malloc(sizeof(t_llist));
-	list->num_nodos = 0;
-	list->first     = NULL;
-	list->last      = NULL;
+	t_llist * ret   = (t_llist*) malloc(sizeof(t_llist));
+	ret->num_nodos = 0;
+	ret->first     = NULL;
+	ret->last      = NULL;
 	return ret;
 }
 //carga un elemento al final de la lista
@@ -23,113 +29,98 @@ void llist_add(void* elem, t_llist* list)
 	{
 		list->first = new_nod;
 		list->last = list->first;
-		list->num_nods++;
+		list->num_nodos++;
 		return;
 	}
 	list->last->next = new_nod;
 	list->last = new_nod;
-	list->num_nods++;
+	list->num_nodos++;
 }
 
 void llist_add_at(void* elem, unsigned pos, t_llist* list)
 {
-	struct NODO * new_nod = malloc(sizeof(struct NODO));
-	struct NODO * passer;
-	struct NODO * old_passer;
-	struct NODO * handler;
-	new_nod->elem = elem;
-	new_nod->next = NULL;
-	unsigned i, num_elems;
-	
-	//Uninitialized list, keep walking this is an initialized list neighborhood
-	if (pos >= list->num_nodos || list->first == NULL) 
+	struct NODO** passer = &list->first;
+	struct NODO* new_nod;
+	unsigned i=0;
+	while(*passer!=NULL)
 	{
-		dllist_add(elem, list);
-		return;
-	}
-	
-	num_elems = list->num_elems;
-	passer = list->first;
-	old_passer = new_nod;
-	i = 0;
-	do {
-		if ( i==pos )
+		if(i==pos)
 		{
-			old_passer->next = new_nod;
-			new_nod->next = passer;
+			new_nod = malloc(sizeof(struct NODO));
+			new_nod->next = *passer;
+			*passer = new_nod;
+			new_nod->elem = elem;
+			list->num_nodos++;
+			break;
 		}
-		handler = passer;
-		passer = passer->next;
-		old_passer = handler;
+		passer=&(*passer)->next;
 		i++;
-	}while (i<pos);
-	return;
+	}
 }
 
 void* llist_get_at(unsigned pos, t_llist* list)
 {
 	struct NODO * passer = list->first;
 	unsigned i = 0;
-	if ( passer == NULL || pos >= list->num_nodos ) return NULL;
-	do {
-		if ( i==pos )return passer->elem;	
+	for(; i<pos && passer!=NULL; i++)
+	{
+		if(i==pos) return passer->elem;
 		passer = passer->next;
-		i++;
-	}while(i<=pos);
+	}
+	return passer;//si llegamos aqui sin nada, es que passer es igual a NULL
 }
 
 static struct NODO* llist_get_nodo_at(unsigned pos, t_llist* list)
 {
 	struct NODO * passer = list->first;
 	unsigned i = 0;
-	if ( passer == NULL || pos >= list->num_nodos ) return NULL;
-	do {
-		if ( i==pos ) break;	
+	for(; i<pos && passer!=NULL; i++)
+	{
+		if (i == pos) return passer;
 		passer = passer->next;
-		i++;
-	}while(i<=pos);
+	}
 	return passer;
 }
 
 void* llist_remove_at(unsigned pos, t_llist* list)
 {
-	struct NODO* passer = list->first;
-	struct NODO* handler;
-	struct NODO* older = list->first;
+	struct NODO** passer = &list->first;
+	struct NODO* handle = NULL;
+	void* ret = NULL;
 	unsigned i=0;
-	if ( passer == NULL || pos >= list->num_nodos ) return NULL;
-	do {
+	for(; i<pos && (*passer)!=NULL; i++)
+	{
 		if (i==pos)
-		{
-			older->next = passer->next;
-			break;
+		{//ahora mismo estoy apuntando, al "Next" del puntero anterior
+		//solo tengo que 
+		//domino bien punteros simples, pero los dobles todavia me confunden
+			handle = *passer;
+			*passer = handle->next;//actualizamos el puntero al siguiente para no romper la cadena
+			ret = handle->elem;
+			free(handle);
+			return ret;
 		}
+		passer = &(*passer)->next;
 		i++;
-		handler = passer;
-		passer = passer->next;
-		older = handler;	
-	}while(i<=pos);
-	return passer->elem;
+	}
+	return NULL;
 }
 struct NODO* llist_remove_nodo_at(unsigned pos, t_llist* list)
 {
-	struct NODO* passer = list->first;
-	struct NODO* handler;
-	struct NODO* older = list->first;
+	struct NODO** passer = &list->first;
+	struct NODO* handle = NULL;
 	unsigned i=0;
-	if ( passer == NULL || pos >= list->num_nodos ) return NULL;
-	do {
+	for(; i<pos && (*passer)!=NULL; i++)
+	{
+		passer = &(*passer)->next;
 		if (i==pos)
 		{
-			older->next = passer->next;
-			break;
+			handle = *passer;
+			*passer = handle->next;
+			return handle;
 		}
-		i++;
-		handler = passer;
-		passer = passer->next;
-		older = handler;	
-	}while(i<=pos);
-	return passer;
+	}
+	return NULL;
 }
 void llist_simple_destroy(t_llist* list)
 {
@@ -143,7 +134,7 @@ void llist_simple_destroy(t_llist* list)
 		free(older);
 	}
 }
-void llist_destroy(t_llist* list, void (elem_destroyer*)(void**))
+void llist_destroy(t_llist* list, void (*elem_destroyer)(void**))
 {
 	struct NODO* passer = list->first;
 	struct NODO* older;
@@ -174,7 +165,6 @@ t_llist* llist_map(t_llist* list, void* (*convert)(void*))
 void* llist_find_get(t_llist* list, void* elem, int (*cmp_func)(void*, void*))
 {
 	struct NODO* passer = list->first;
-	void* ret;
 	while(passer!=NULL)
 	{
 		if ( cmp_func(elem, passer) == 0) goto RESULT;
@@ -185,7 +175,7 @@ void* llist_find_get(t_llist* list, void* elem, int (*cmp_func)(void*, void*))
 	return passer->elem;
 }
 
-long llist_find(t_llist* list, void elem, int(*cmp_func)(void*, void*))
+long llist_find(t_llist* list, void* elem, int(*cmp_func)(void*, void*))
 {
 	struct NODO* passer = list->first;
 	long ret=0;
@@ -206,11 +196,11 @@ void llist_sort(t_llist* list, int(*cmp_func)(void*, void*))
 {
 	unsigned gap, i, j, size = list->num_nodos;
 	void* tmp;
-	struct NODO* v1;
-	struct NODO* v2;
-	for(gap=size/2; gap>0; gap/2)
+	struct NODO * v1;
+	struct NODO * v2;
+	for(gap=size/2; gap>0; gap/=2)
 		for(i=gap; i<size; i++)
-			for(j=i-gap; j>=0 && cmp_func((v1 = llist_get_nodo_at(list,j)), (v2 = llist_get_nodo_at(list,j+gap)))>0; j-=gap)
+			for(j=i-gap; j>=0 && cmp_func((v1 = llist_get_nodo_at(j,list)), (v2 = llist_get_nodo_at(j+gap,list)))>0; j-=gap)
 			{
 				tmp = v1->elem;
 				v1->elem = v2->elem;

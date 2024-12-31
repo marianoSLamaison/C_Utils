@@ -1,6 +1,6 @@
 #ifndef HASH_MAP_H
 #define HASH_MAP_H
-
+#include <stdlib.h>
 
 //NOTA: quiero que sea de referencia cerrada me parece mas justo
 //por ahora solo hay dos mensajes de error
@@ -43,7 +43,7 @@ void* hmap_get_value(unsigned char* key, size_t key_size, t_hmap* map);
  * de mascara y compare
  * EJ: ret & FAILURE_CREATING == FAILURE_CREATING
  * */
-int hmanp_add(unsigned char* key, size_t key_size, void* val, t_hmap* map);
+int hmap_add(unsigned char* key, size_t key_size, void* val, t_hmap* map);
 /**
  * Destruye todo el diccionario suponiendo
  * que los vals* no tiene punteros a nada
