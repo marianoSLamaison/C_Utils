@@ -1,6 +1,6 @@
 # C_UTILS
 
-	Es un cumpilado de funciones y structs que uso comunmente al 
+   Es un cumpilado de funciones y structs que uso comunmente al 
 trabajar en C. Es para uso personal, y tiene apuntes por si alguien es 
 curioso, pero mi idea es que se pueda usar en cualquier projecto.
 Le ire añadiendo partes a medida que valla necesitando cosas, pero por ahora
