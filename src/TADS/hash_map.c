@@ -19,12 +19,12 @@ struct INDEX_NODE
 	unsigned char* key;
 	size_t key_size;
 	void * val;
-	struct NODO * next;
+	struct INDEX_NODE * next;
 };
 
 struct INDEX_LIST
 {
-	struct NODO* head;
+	struct INDEX_NODE* head;
 	int count;//el cap es igual para todos, 
 		  //a si que lo dejo como una constnte global
 };
@@ -41,19 +41,19 @@ t_hmap* hmap_create(void)
 	struct INDEX_LIST* ret_indices;
 	int i;
 	ret->cap = DEFAULT_MAP_SIZE;
-	ret_indices = malloc(sizeof(struct INDEX_LIST) * DEFUALT_MAP_SIZE);
+	ret_indices = malloc(sizeof(struct INDEX_LIST) * DEFAULT_MAP_SIZE);
 	for(i=0; i<DEFAULT_MAP_SIZE; i++)
 	{
-		(ret + i)->head = NULL;
-		(ret + i)->count = 0;
+		(ret_indices + i)->head = NULL;
+		(ret_indices + i)->count = 0;
 	}
-	ret->indices = ret_indeices;
+	ret->indices = ret_indices;
 	return ret;
 }
 
 static int get_index_from_key(unsigned char* key, size_t key_size, int cap)
 {
-	unsigned long hash = 0;
+	unsigned long hash = 0, n;
 	int i;
 	
 	for(i=0; i<key_size; i++)
@@ -66,7 +66,7 @@ static int get_index_from_key(unsigned char* key, size_t key_size, int cap)
 	}
 	return hash % cap;
 }
-static int index_list_push(struct INDEX_LIST* list, unsigned char key, size_t key_size, void* val)
+static int index_list_push(struct INDEX_LIST* list, unsigned char* key, size_t key_size, void* val)
 {
 	struct INDEX_NODE* new_node = malloc(sizeof(struct INDEX_NODE));
 	if (new_node == NULL) return FAILURE_CREATING;
@@ -136,7 +136,7 @@ static int hmap_rehash(t_hmap* map)
 	return 0;
 }
 
-static int cmp_keys(unsigned char* key1, size_t key_size1, unsigned char key2, size_t key_size2)
+static int cmp_keys(unsigned char* key1, size_t key_size1, unsigned char* key2, size_t key_size2)
 {
 	int i;
 	if (key1 == key2) return 0;//si apuntan a lo mismo son lo mismo en lo que a mi respecta
@@ -151,9 +151,10 @@ static int cmp_keys(unsigned char* key1, size_t key_size1, unsigned char key2, s
 	return 0;
 }
 
-static struct INDEX_NODE* list_get_node(struct INDEX_LIST* list, unsigned char key, size_t key_size)
+static struct INDEX_NODE* list_get_node(struct INDEX_LIST* list, unsigned char* key, size_t key_size)
 {
 	struct INDEX_NODE* nodo = list->head;
+	if (list->count==0) return list->head;
 	while(nodo != NULL)
 	{
 		if (cmp_keys(key, key_size, nodo->key, nodo->key_size) == 0) break;
@@ -169,7 +170,7 @@ static struct INDEX_NODE* list_remove(struct INDEX_LIST* list, unsigned char* ke
 	
 	while(nodo != NULL)
 	{
-		if (cmp_keys(key, key_size, nodo->key, nodo->size) == 0) 
+		if (cmp_keys(key, key_size, nodo->key, nodo->key_size) == 0) 
 		{
 			if (old_nodo != NULL) 
 			{
@@ -189,7 +190,7 @@ static struct INDEX_NODE* list_remove(struct INDEX_LIST* list, unsigned char* ke
 
 void* hmap_remove_with_key(unsigned char* key, size_t key_size, t_hmap* map)
 {
-	int index = get_indes_from_key(key, key_size, map->cap);
+	int index = get_index_from_key(key, key_size, map->cap);
 	struct INDEX_NODE* node = list_remove(map->indices + index, key, key_size);
 	void* val = node->val;
 	free(node->key);
@@ -226,9 +227,9 @@ void hmap_simple_destroy(t_hmap* map)
 		list = (map->indices + i);
 		while(list->head != NULL)
 		{
-			nodo = list_pop(map->indices + i);
-			free(nodo->key);
-			free(nodo->val);
+			nodo = index_list_pop(list);
+			//free(nodo->key);
+			//free(nodo->val);
 			free(nodo);
 		}
 	}
@@ -246,8 +247,8 @@ void hmap_destroy_vals(void (*val_destroyer)(void*), t_hmap* map)
 		list = (map->indices + i);
 		while(list->head != NULL)
 		{
-			nodo = list_pop(map->indices + i);
-			free(nodo->key);
+			nodo = index_list_pop(list);
+			//free(nodo->key);
 			val_destroyer(nodo->val);
 			free(nodo);
 		}

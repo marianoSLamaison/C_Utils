@@ -1,4 +1,4 @@
-#include "TADS/examples.c"
+#include "TADS/examples.h"
 
 int main(void)
 {
