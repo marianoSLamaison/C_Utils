@@ -1,3 +1,4 @@
 *.o
 objs/
 ejemplo
+main.c
