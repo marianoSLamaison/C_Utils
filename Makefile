@@ -1,10 +1,8 @@
+-include data.mk
 CC := gcc
 AR := ar
 AR_ARGS = rcs
 CFLAGS := -Wall
-lib_name := cutils_lib
-lib_dir  := ../src/libs
-LDFLAGS := 
 export c_lib_dir
 DEPENDFLAGS := -MMD -MP
 OBJS_DIR := objs
@@ -22,10 +20,9 @@ all : $(lib_name).a
 #El orden da igual, pero parece que es comun definirlo
 #antes de los argumentos
 
-cinstall : $(c_lib_dir)/$(lib_name).a
+cinstall : $(c_lib_dir)/$(LIB_NAME).a
 
-$(c_lib_dir)/$(lib_name).a : $(OBJECTFILES)
-
+$(c_lib_dir)/$(LIB_NAME).a : $(OBJECTFILES)
 ifeq ($(c_lib_dir),)
 	@echo no valor definido para c_lib_dir no se creo nada
 else
@@ -42,14 +39,14 @@ install : $(lib_dir)/$(lib_name).a
 $(lib_dir)/$(lib_name).a : $(OBJECTFILES)
 	@echo instalando libreria $^
 	${AR} ${AR_ARGS} $@ $^
-	@echo '\n'
+	@echo 
 
 .PHONY : tests
 
 tests : $(TARGET) 
 
 $(lib_name).a : $(OBJECTFILES)
-	@echo creando libreria ${lib_name} '\n'
+	@echo creando libreria ${LIB_NAME} '\n'
 	@echo "Los objetos incluidos son : "'\n' $(OBJECTFILES) '\n''\n'
 	${AR} ${AR_ARGS} $@ $^
 
@@ -57,13 +54,12 @@ $(lib_name).a : $(OBJECTFILES)
 $(TARGET) : $(OBJECTFILES)
 	@echo El programa $(TARGET) esta siendo construido
 	@echo usando los headers $(patsubst %.c, %.h, $(SOURCEFILES))
-	$(CC) $(CFLAGS) $(OBJECTFILES) -o $(TARGET) $(LDFLAGS)
+	$(CC) $(CFLAGS) $(OBJECTFILES) -o $(TARGET)
 
 $(OBJS_DIR)/%.o : %.c
-	#TODO: Ver como hacer que esto sea condicional
 	if ! test -d $(dir @) ; then mkdir -p $(dir @); fi
 	#mkdir -p $(dir $@)
-	$(CC) -c $(CFLAGS) $(LDFLAGS) $< -o $@ $(DEPENDFLAGS)
+	$(CC) -c $(CFLAGS) $< -o $@ $(DEPENDFLAGS)
 
 
 -include $(OBJECTFILES:.o=.d)

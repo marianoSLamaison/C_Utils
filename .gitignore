@@ -3,3 +3,4 @@ objs/
 ejemplo
 main.c
 */main.c
+*.a
