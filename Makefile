@@ -60,8 +60,11 @@ $(TARGET) : $(OBJECTFILES)
 	$(CC) $(CFLAGS) $(OBJECTFILES) -o $(TARGET) $(LDFLAGS)
 
 $(OBJS_DIR)/%.o : %.c
-	mkdir -p $(dir $@)
+	#TODO: Ver como hacer que esto sea condicional
+	if ! test -d $(dir @) ; then mkdir -p $(dir @); fi
+	#mkdir -p $(dir $@)
 	$(CC) -c $(CFLAGS) $(LDFLAGS) $< -o $@ $(DEPENDFLAGS)
+
 
 -include $(OBJECTFILES:.o=.d)
 
