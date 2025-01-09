@@ -69,10 +69,10 @@ void hmap_destroy(void (*val_destroyer)(void*), void (*key_destroyer)(void*), t_
 /**
 MatroFunction solo llama a hmap_destroy con free como su argumento para key_destroyer
 */
-#define hmap_destroy_v(val_destroyer, map) hmap_destroy((val_destoryer), free, (map))
+#define hmap_destroy_v(VDESTROYER, MAP) (hmap_destroy((VDESTROYER), free, (MAP)))
 /**
 MatroFunction solo llama a hmap_destroy con free como su argumento para val_destroyer
 */
-#define hmap_destroy_k(key_destroyer, map) hmap_destroy(free, (key_destroyer), (map)) 
+#define hmap_destroy_k(KDESTROYER, MAP) hmap_destroy(free, (KDESTROYER), (MAP)) 
 
 #endif
