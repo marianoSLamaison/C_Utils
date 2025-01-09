@@ -11,3 +11,6 @@ las cosas que tengo planeado son
 4. BitMaps y funciones para trabar estos
 5. Algo para leer archivos de configuración
 
+## Nota respecto de la creacion de librerias C
+
+
