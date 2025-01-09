@@ -18,6 +18,7 @@ OBJS_DIR := objs#carpeta para objetos
 FILS_DIR := src #Carpeta para codigo fuente
 SOURCES := $(shell find ${FILS_DIR} -name '*.c')
 OBJECTS := $(patsubst %.c, %.o, $(addprefix ${OBJS_DIR}/, $(SOURCES)))
+UTILS_HEADERS=$(CURDIR)/${HEADERS_FOLDER}
 
 #custom install que es lo que casi siempre se usara
 #no se quien llamaria cinstall a un archivo, pero por si acaso lo hago asi
