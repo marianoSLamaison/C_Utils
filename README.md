@@ -13,4 +13,8 @@ las cosas que tengo planeado son
 
 ## Nota respecto de la creacion de librerias C
 
-
+*Recordatorios*
+Recuerda poner los headers en algun lugar facil de encontrar, 
+los usuarios tiene que poder llamar a estos para usar tu libreria.
+	Tambien recuerda usar -I$(CURDIR) junto a -L(Donde sea que hallas metido el .a o .so)
+	De otra manera gcc no sabra que hacer

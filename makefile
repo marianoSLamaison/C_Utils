@@ -45,8 +45,8 @@ endif
 #Compilamos todos los objetos
 #%.lo : %.c
 $(OBJS_DIR)/%.o : %.c
-	if ! test -d $(dir $@) ; then mkdir -p $(dir $@); fi
-	$(CC) -c $(CFLAGS) $< -o $@ $(DEPENDFLAGS)
-	#libtool --mode=compile $(CC) -I. -g -O -c $<
+	@if ! test -d $(dir $@) ; then mkdir -p $(dir $@); fi
+	$(CC) -c -I ${UTILS_HEADERS} $(CFLAGS) $< -o $@ $(DEPENDFLAGS)
+	@#libtool --mode=compile $(CC) -I. -g -O -c $<
 
 -include $(OBJECTS:.o=.d)
