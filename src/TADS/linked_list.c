@@ -1,5 +1,5 @@
 #include "linked_list.h"
-
+#include<stdlib.h>
 struct NODO
 {
 	struct NODO * next;
