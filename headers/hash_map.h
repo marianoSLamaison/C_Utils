@@ -1,6 +1,8 @@
 #ifndef HASH_MAP_H
 #define HASH_MAP_H
-#include <stdlib.h>
+//Nota: 
+//	Las llamadas a librerias extra como stdlib, se hacen en el .c para
+//	evitar inclusiones no deseadas
 
 //NOTA: quiero que sea de referencia cerrada me parece mas justo
 //por ahora solo hay dos mensajes de error
@@ -9,8 +11,9 @@
 //y otro para si pudo generarla, necesito
 //hacer un rehash y no pudo.
 enum MENSAJES{
-	FAILURE_CREATING = 0x0F,
-	FAILURE_REHASHING = 0xF0,
+	FAILURE_CREATING = 0x01,
+	FAILURE_REHASHING = 0x02,
+	KEY_IN_USE = 0x04,//si confirmamos que la key ya estaba en uso
 	EXITO = 0x00
 };
 //la definicion esta en el punto c
@@ -21,7 +24,8 @@ typedef struct HASH_MAP t_hmap;
 typedef struct KEY_VAL_PAIR
 {
 	void* key;
-	size_t key_size;
+	//Yes I will rather just use unsigned int before bowing to stddef.h
+	unsigned int key_size;
 	void* val;
 } t_kvpair;
 
@@ -34,13 +38,13 @@ t_hmap* hmap_create(void);
  * que a sido retirado o NULL si no 
  * encontro nada.
  * */
-t_kvpair* hmap_remove_pair(unsigned char* key, size_t key_size, t_hmap* map);
+t_kvpair* hmap_remove_pair(unsigned char* key, unsigned int key_size, t_hmap* map);
 /**
  * Retorna el valor asociado a una key,
  * sin removerlo del map en si.
  * Retorna NULL si no encontro nada
  * */
-void* hmap_get_value(unsigned char* key, size_t key_size, t_hmap* map);
+void* hmap_get_value(unsigned char* key, unsigned int key_size, t_hmap* map);
 /**
  * Añade un elemento al diccionario,
  * Retorna 0 si la operacion fue exitosa
@@ -51,7 +55,7 @@ void* hmap_get_value(unsigned char* key, size_t key_size, t_hmap* map);
  * de mascara y compare
  * EJ: ret & FAILURE_CREATING == FAILURE_CREATING
  * */
-int hmap_add(unsigned char* key, size_t key_size, void* val, t_hmap* map);
+int hmap_add(unsigned char* key, unsigned int key_size, void* val, t_hmap* map);
 /**
  * Destruye todo el diccionario suponiendo
  * que lo creaste solamente de valores que todavia existen en arrays
